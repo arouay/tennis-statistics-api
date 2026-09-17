@@ -12,4 +12,23 @@ export class PlayerController {
       res.status(500).json({ message: 'Failed to fetch players' });
     }
   };
+
+  getById = async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+      res.status(400).json({ message: 'Invalid player id' });
+      return;
+    }
+
+    try {
+      const player = await this.playerService.getById(id);
+      if (!player) {
+        res.status(404).json({ message: 'Player not found' });
+        return;
+      }
+      res.json(player);
+    } catch (err) {
+      res.status(500).json({ message: 'Failed to fetch player' });
+    }
+  };
 }

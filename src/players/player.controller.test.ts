@@ -29,6 +29,7 @@ describe('PlayerController', () => {
   beforeEach(() => {
     service = {
       getAll: jest.fn(),
+      getById: jest.fn(),
     } as unknown as jest.Mocked<PlayerService>;
     controller = new PlayerController(service);
     res = mockResponse();
@@ -51,6 +52,48 @@ describe('PlayerController', () => {
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: 'Failed to fetch players' });
+    });
+  });
+
+  describe('getById', () => {
+    it('responds with the player when found', async () => {
+      service.getById.mockResolvedValue(player);
+      const req = { params: { id: '52' } } as unknown as Request;
+
+      await controller.getById(req, res);
+
+      expect(service.getById).toHaveBeenCalledWith(52);
+      expect(res.json).toHaveBeenCalledWith(player);
+    });
+
+    it('responds 404 when the service finds nothing', async () => {
+      service.getById.mockResolvedValue(null);
+      const req = { params: { id: '999999' } } as unknown as Request;
+
+      await controller.getById(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Player not found' });
+    });
+
+    it('responds 400 and skips the service when the id is not an integer', async () => {
+      const req = { params: { id: 'abc' } } as unknown as Request;
+
+      await controller.getById(req, res);
+
+      expect(service.getById).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Invalid player id' });
+    });
+
+    it('responds 500 when the service throws', async () => {
+      service.getById.mockRejectedValue(new Error('db down'));
+      const req = { params: { id: '52' } } as unknown as Request;
+
+      await controller.getById(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Failed to fetch player' });
     });
   });
 });

@@ -20,6 +20,7 @@ describe('PlayerService', () => {
   beforeEach(() => {
     repository = {
       findAll: jest.fn(),
+      findById: jest.fn(),
     } as unknown as jest.Mocked<PlayerRepository>;
     service = new PlayerService(repository);
   });
@@ -31,6 +32,25 @@ describe('PlayerService', () => {
       const result = await service.getAll();
 
       expect(result).toEqual([player]);
+    });
+  });
+
+  describe('getById', () => {
+    it('delegates to the repository with the given id', async () => {
+      repository.findById.mockResolvedValue(player);
+
+      const result = await service.getById(52);
+
+      expect(repository.findById).toHaveBeenCalledWith(52);
+      expect(result).toEqual(player);
+    });
+
+    it('returns null when the repository finds nothing', async () => {
+      repository.findById.mockResolvedValue(null);
+
+      const result = await service.getById(999999);
+
+      expect(result).toBeNull();
     });
   });
 });

@@ -7,4 +7,8 @@ export class PlayerService {
   getAll(): Promise<Player[]> {
     return this.playerRepository.findAll();
   }
+
+  getById(id: number): Promise<Player | null> {
+    return this.playerRepository.findById(id);
+  }
 }
