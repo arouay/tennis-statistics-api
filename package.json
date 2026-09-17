@@ -4,20 +4,30 @@
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "migrate:create": "node-pg-migrate create -j ts --",
+    "migrate:up": "node-pg-migrate up",
+    "migrate:down": "node-pg-migrate down",
+    "seed": "tsx seeds/players.seed.ts"
   },
   "keywords": [],
   "author": "",
   "homepage": "https://github.com/arouay/tennis-statistics-api#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.23.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^22.20.3",
-    "ts-node-dev": "^2.0.0",
+    "@types/pg": "^8.23.1",
+    "node-pg-migrate": "^9.0.0",
+    "tsx": "^4.23.13",
     "typescript": "^7.0.2"
   }
 }

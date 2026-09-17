@@ -4,7 +4,7 @@ import { Player } from './player.model';
 export class PlayerService {
   constructor(private readonly playerRepository: PlayerRepository) {}
 
-  getAll(): Player[] {
+  getAll(): Promise<Player[]> {
     return this.playerRepository.findAll();
   }
 }
