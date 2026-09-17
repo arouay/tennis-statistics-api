@@ -5,6 +5,7 @@ import { PlayerRepository } from './players/player.repository';
 import { StatisticController } from './statistics/statistic.controller';
 import { StatisticService } from './statistics/statistic.service';
 import { StatisticRepository } from './statistics/statistic.repository';
+import { CountryRepository } from './countries/country.repository';
 
 interface Cradle {
   playerRepository: PlayerRepository;
@@ -13,6 +14,7 @@ interface Cradle {
   statisticRepository: StatisticRepository;
   statisticService: StatisticService;
   statisticController: StatisticController;
+  countryRepository: CountryRepository;
 }
 
 const container: AwilixContainer<Cradle> = createContainer<Cradle>({
@@ -26,6 +28,7 @@ container.register({
   statisticRepository: asClass(StatisticRepository).singleton(),
   statisticService: asClass(StatisticService).singleton(),
   statisticController: asClass(StatisticController).singleton(),
+  countryRepository: asClass(CountryRepository).singleton(),
 });
 
 export { container };

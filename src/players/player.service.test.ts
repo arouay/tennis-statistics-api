@@ -1,6 +1,8 @@
 import { PlayerService } from './player.service';
 import { PlayerRepository } from './player.repository';
 import { Player } from './player.model';
+import { CreatePlayerInput } from './player.schema';
+import { CountryRepository } from '../countries/country.repository';
 
 const player: Player = {
   id: 52,
@@ -15,14 +17,20 @@ const player: Player = {
 
 describe('PlayerService', () => {
   let repository: jest.Mocked<PlayerRepository>;
+  let countryRepository: jest.Mocked<CountryRepository>;
   let service: PlayerService;
 
   beforeEach(() => {
     repository = {
       findAll: jest.fn(),
       findById: jest.fn(),
+      create: jest.fn(),
     } as unknown as jest.Mocked<PlayerRepository>;
-    service = new PlayerService(repository);
+    countryRepository = {
+      exists: jest.fn(),
+    } as unknown as jest.Mocked<CountryRepository>;
+    countryRepository.exists.mockResolvedValue(true);
+    service = new PlayerService(repository, countryRepository);
   });
 
   describe('getAll', () => {
@@ -50,6 +58,29 @@ describe('PlayerService', () => {
 
       const result = await service.getById(999999);
 
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('create', () => {
+    it('delegates to the repository when the country exists', async () => {
+      const input = { firstName: 'Serena', countryCode: 'USA' } as CreatePlayerInput;
+      repository.create.mockResolvedValue(player);
+
+      const result = await service.create(input);
+
+      expect(countryRepository.exists).toHaveBeenCalledWith('USA');
+      expect(repository.create).toHaveBeenCalledWith(input);
+      expect(result).toEqual(player);
+    });
+
+    it('returns null without inserting when the country does not exist', async () => {
+      const input = { firstName: 'Serena', countryCode: 'XXX' } as CreatePlayerInput;
+      countryRepository.exists.mockResolvedValue(false);
+
+      const result = await service.create(input);
+
+      expect(repository.create).not.toHaveBeenCalled();
       expect(result).toBeNull();
     });
   });

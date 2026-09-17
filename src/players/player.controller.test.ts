@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { PlayerController } from './player.controller';
 import { PlayerService } from './player.service';
 import { Player } from './player.model';
+import { CreatePlayerInput } from './player.schema';
 
 const player: Player = {
   id: 52,
@@ -30,6 +31,7 @@ describe('PlayerController', () => {
     service = {
       getAll: jest.fn(),
       getById: jest.fn(),
+      create: jest.fn(),
     } as unknown as jest.Mocked<PlayerService>;
     controller = new PlayerController(service);
     res = mockResponse();
@@ -84,6 +86,39 @@ describe('PlayerController', () => {
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: 'Failed to fetch player' });
+    });
+  });
+
+  describe('create', () => {
+    it('responds 201 with the created player', async () => {
+      service.create.mockResolvedValue(player);
+      res.locals.body = { firstName: 'Serena' } as CreatePlayerInput;
+
+      await controller.create({} as Request, res);
+
+      expect(service.create).toHaveBeenCalledWith({ firstName: 'Serena' });
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith(player);
+    });
+
+    it('responds 400 when the service finds no matching country', async () => {
+      service.create.mockResolvedValue(null);
+      res.locals.body = { firstName: 'Serena', countryCode: 'XXX' } as CreatePlayerInput;
+
+      await controller.create({} as Request, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Country not found' });
+    });
+
+    it('responds 500 on an unexpected error', async () => {
+      service.create.mockRejectedValue(new Error('db down'));
+      res.locals.body = { firstName: 'Serena' } as CreatePlayerInput;
+
+      await controller.create({} as Request, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Failed to create player' });
     });
   });
 });

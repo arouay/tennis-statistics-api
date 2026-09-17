@@ -1,6 +1,7 @@
 import { pool } from '../config/database';
 import { Player } from './player.model';
 import { Sex } from '../common/constants';
+import { CreatePlayerInput } from './player.schema';
 
 interface PlayerRow {
   id: number;
@@ -62,6 +63,38 @@ export class PlayerRepository {
 
     const row = result.rows[0];
     return row ? this.toPlayer(row) : null;
+  }
+
+  async create(data: CreatePlayerInput): Promise<Player> {
+    const client = await pool.connect();
+    let id: number;
+    try {
+      await client.query('BEGIN');
+      const insertResult = await client.query<{ id: number }>(
+        `INSERT INTO players (first_name, last_name, short_name, sex, picture, country_code, birthdate)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         RETURNING id`,
+        [data.firstName, data.lastName, data.shortName, data.sex, data.picture, data.countryCode, data.birthdate],
+      );
+      id = insertResult.rows[0].id;
+      await client.query(
+        `INSERT INTO player_statistics (player_id, points, weight_grams, height_cm, last_results)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [id, data.points, data.weightGrams, data.heightCm, data.lastResults],
+      );
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+
+    const player = await this.findById(id);
+    if (!player) {
+      throw new Error(`Player ${id} was created but could not be reloaded`);
+    }
+    return player;
   }
 
   private toPlayer(row: PlayerRow): Player {
