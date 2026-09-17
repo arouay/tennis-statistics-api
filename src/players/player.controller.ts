@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PlayerService } from './player.service';
+import { GetPlayerParams } from './player.schema';
 
 export class PlayerController {
   constructor(private readonly playerService: PlayerService) {}
@@ -14,11 +15,7 @@ export class PlayerController {
   };
 
   getById = async (req: Request, res: Response) => {
-    const id = Number(req.params.id);
-    if (!Number.isInteger(id)) {
-      res.status(400).json({ message: 'Invalid player id' });
-      return;
-    }
+    const { id } = res.locals.params as GetPlayerParams;
 
     try {
       const player = await this.playerService.getById(id);
