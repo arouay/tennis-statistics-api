@@ -1,10 +1,8 @@
 import { Router } from 'express';
-import { StatisticController } from './statistic.controller';
-import { StatisticService } from './statistic.service';
-import { StatisticRepository } from './statistic.repository';
+import { container } from '../container';
 
 const router = Router();
-const statisticController = new StatisticController(new StatisticService(new StatisticRepository()));
+const statisticController = container.resolve('statisticController');
 
 router.get('/', statisticController.getAll);
 

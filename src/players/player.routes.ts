@@ -1,10 +1,8 @@
 import { Router } from 'express';
-import { PlayerController } from './player.controller';
-import { PlayerService } from './player.service';
-import { PlayerRepository } from './player.repository';
+import { container } from '../container';
 
 const router = Router();
-const playerController = new PlayerController(new PlayerService(new PlayerRepository()));
+const playerController = container.resolve('playerController');
 
 router.get('/', playerController.getAll);
 
