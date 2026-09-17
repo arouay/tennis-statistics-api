@@ -12,7 +12,9 @@
     "migrate:create": "node-pg-migrate create -j ts --",
     "migrate:up": "node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
-    "seed": "tsx seeds/players.seed.ts"
+    "seed": "tsx seeds/players.seed.ts",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "keywords": [],
   "author": "",
@@ -24,9 +26,13 @@
     "pg": "^8.23.0"
   },
   "devDependencies": {
+    "@swc/core": "^1.16.2",
+    "@swc/jest": "^0.2.39",
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.20.3",
     "@types/pg": "^8.23.1",
+    "jest": "^30.5.1",
     "node-pg-migrate": "^9.0.0",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2"
