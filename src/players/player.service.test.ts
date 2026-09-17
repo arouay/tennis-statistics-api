@@ -3,6 +3,7 @@ import { PlayerRepository } from './player.repository';
 import { Player } from './player.model';
 import { CreatePlayerInput } from './player.schema';
 import { CountryRepository } from '../countries/country.repository';
+import { CountryNotFoundError, PlayerNotFoundError } from './player.errors';
 
 const player: Player = {
   id: 52,
@@ -53,12 +54,10 @@ describe('PlayerService', () => {
       expect(result).toEqual(player);
     });
 
-    it('returns null when the repository finds nothing', async () => {
+    it('throws PlayerNotFoundError when the repository finds nothing', async () => {
       repository.findById.mockResolvedValue(null);
 
-      const result = await service.getById(999999);
-
-      expect(result).toBeNull();
+      await expect(service.getById(999999)).rejects.toThrow(PlayerNotFoundError);
     });
   });
 
@@ -74,14 +73,12 @@ describe('PlayerService', () => {
       expect(result).toEqual(player);
     });
 
-    it('returns null without inserting when the country does not exist', async () => {
+    it('throws CountryNotFoundError without inserting when the country does not exist', async () => {
       const input = { firstName: 'Serena', countryCode: 'XXX' } as CreatePlayerInput;
       countryRepository.exists.mockResolvedValue(false);
 
-      const result = await service.create(input);
-
+      await expect(service.create(input)).rejects.toThrow(CountryNotFoundError);
       expect(repository.create).not.toHaveBeenCalled();
-      expect(result).toBeNull();
     });
   });
 });

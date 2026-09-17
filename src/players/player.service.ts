@@ -2,6 +2,7 @@ import { PlayerRepository } from './player.repository';
 import { Player } from './player.model';
 import { CreatePlayerInput } from './player.schema';
 import { CountryRepository } from '../countries/country.repository';
+import { CountryNotFoundError, PlayerNotFoundError } from './player.errors';
 
 export class PlayerService {
   constructor(
@@ -13,14 +14,18 @@ export class PlayerService {
     return this.playerRepository.findAll();
   }
 
-  getById(id: number): Promise<Player | null> {
-    return this.playerRepository.findById(id);
+  async getById(id: number): Promise<Player> {
+    const player = await this.playerRepository.findById(id);
+    if (!player) {
+      throw new PlayerNotFoundError(id);
+    }
+    return player;
   }
 
-  async create(data: CreatePlayerInput): Promise<Player | null> {
+  async create(data: CreatePlayerInput): Promise<Player> {
     const countryExists = await this.countryRepository.exists(data.countryCode);
     if (!countryExists) {
-      return null;
+      throw new CountryNotFoundError(data.countryCode);
     }
     return this.playerRepository.create(data);
   }

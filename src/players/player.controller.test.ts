@@ -3,6 +3,7 @@ import { PlayerController } from './player.controller';
 import { PlayerService } from './player.service';
 import { Player } from './player.model';
 import { CreatePlayerInput } from './player.schema';
+import { PlayerNotFoundError } from './player.errors';
 
 const player: Player = {
   id: 52,
@@ -44,16 +45,6 @@ describe('PlayerController', () => {
       await controller.getAll({} as Request, res);
 
       expect(res.json).toHaveBeenCalledWith([player]);
-      expect(res.status).not.toHaveBeenCalled();
-    });
-
-    it('responds 500 when the service throws', async () => {
-      service.getAll.mockRejectedValue(new Error('db down'));
-
-      await controller.getAll({} as Request, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Failed to fetch players' });
     });
   });
 
@@ -68,24 +59,11 @@ describe('PlayerController', () => {
       expect(res.json).toHaveBeenCalledWith(player);
     });
 
-    it('responds 404 when the service finds nothing', async () => {
-      service.getById.mockResolvedValue(null);
+    it('propagates errors from the service instead of swallowing them', async () => {
+      service.getById.mockRejectedValue(new PlayerNotFoundError(999999));
       res.locals.params = { id: 999999 };
 
-      await controller.getById({} as Request, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Player not found' });
-    });
-
-    it('responds 500 when the service throws', async () => {
-      service.getById.mockRejectedValue(new Error('db down'));
-      res.locals.params = { id: 52 };
-
-      await controller.getById({} as Request, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Failed to fetch player' });
+      await expect(controller.getById({} as Request, res)).rejects.toThrow(PlayerNotFoundError);
     });
   });
 
@@ -101,24 +79,11 @@ describe('PlayerController', () => {
       expect(res.json).toHaveBeenCalledWith(player);
     });
 
-    it('responds 400 when the service finds no matching country', async () => {
-      service.create.mockResolvedValue(null);
-      res.locals.body = { firstName: 'Serena', countryCode: 'XXX' } as CreatePlayerInput;
-
-      await controller.create({} as Request, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Country not found' });
-    });
-
-    it('responds 500 on an unexpected error', async () => {
+    it('propagates errors from the service instead of swallowing them', async () => {
       service.create.mockRejectedValue(new Error('db down'));
       res.locals.body = { firstName: 'Serena' } as CreatePlayerInput;
 
-      await controller.create({} as Request, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Failed to create player' });
+      await expect(controller.create({} as Request, res)).rejects.toThrow('db down');
     });
   });
 });
