@@ -1,4 +1,5 @@
 import { Sex } from '../common/constants';
+import { Country } from '../countries/country.model';
 
 export interface Player {
   id: number;
@@ -7,10 +8,7 @@ export interface Player {
   shortName: string;
   sex: Sex;
   picture: string | null;
-  country: {
-    code: string;
-    picture: string;
-  };
+  country: Country;
   data: {
     rank: number;
     points: number;
