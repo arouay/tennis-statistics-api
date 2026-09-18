@@ -24,7 +24,9 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "pg": "^8.23.0",
-    "zod": "^4.6.5"
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.6.5",
+    "zod-openapi": "^6.0.2"
   },
   "devDependencies": {
     "@swc/core": "^1.16.2",
@@ -33,6 +35,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^22.20.3",
     "@types/pg": "^8.23.1",
+    "@types/swagger-ui-express": "^4.1.8",
     "jest": "^30.5.1",
     "node-pg-migrate": "^9.0.0",
     "tsx": "^4.23.13",
