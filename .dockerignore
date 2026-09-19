@@ -1,0 +1,10 @@
+node_modules
+dist
+seeds
+.git
+.vscode
+.claude
+.env
+npm-debug.log
+coverage
+*.md
