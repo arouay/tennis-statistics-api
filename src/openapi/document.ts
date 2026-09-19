@@ -9,6 +9,12 @@ export function generateOpenApiDocument() {
       title: 'Tennis Statistics API',
       version: '1.0.0',
     },
+    components: {
+      securitySchemes: {
+        bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      },
+    },
+    security: [{ bearerAuth: [] }],
     paths: {
       ...playerPaths,
       ...statisticPaths,
