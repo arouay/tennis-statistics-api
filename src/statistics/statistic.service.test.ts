@@ -24,7 +24,7 @@ describe('StatisticService', () => {
   beforeEach(() => {
     repository = {
       findAllPlayerStats: jest.fn(),
-    } as unknown as jest.Mocked<StatisticRepository>;
+    };
     service = new StatisticService(repository);
   });
 

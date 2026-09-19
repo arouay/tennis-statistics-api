@@ -14,7 +14,9 @@
     "migrate:down": "node-pg-migrate down",
     "seed": "tsx seeds/players.seed.ts",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "keywords": [],
   "author": "",
@@ -32,6 +34,7 @@
     "zod-openapi": "^6.0.2"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@swc/core": "^1.16.2",
     "@swc/jest": "^0.2.39",
     "@types/express": "^5.0.6",
@@ -39,9 +42,14 @@
     "@types/node": "^22.20.3",
     "@types/pg": "^8.23.1",
     "@types/swagger-ui-express": "^4.1.8",
+    "eslint": "^10.11.0",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-import-x": "^4.17.1",
+    "eslint-plugin-n": "^18.3.0",
     "jest": "^30.5.1",
     "node-pg-migrate": "^9.0.0",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.0"
   }
 }

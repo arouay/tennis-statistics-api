@@ -24,7 +24,7 @@ describe('StatisticController', () => {
   beforeEach(() => {
     service = {
       getSummary: jest.fn(),
-    } as unknown as jest.Mocked<StatisticService>;
+    };
     controller = new StatisticController(service);
     res = mockResponse();
   });

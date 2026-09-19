@@ -33,7 +33,7 @@ describe('PlayerController', () => {
       getAll: jest.fn(),
       getById: jest.fn(),
       create: jest.fn(),
-    } as unknown as jest.Mocked<PlayerService>;
+    };
     controller = new PlayerController(service);
     res = mockResponse();
   });

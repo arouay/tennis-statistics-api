@@ -26,10 +26,10 @@ describe('PlayerService', () => {
       findAll: jest.fn(),
       findById: jest.fn(),
       create: jest.fn(),
-    } as unknown as jest.Mocked<PlayerRepository>;
+    };
     countryRepository = {
       exists: jest.fn(),
-    } as unknown as jest.Mocked<CountryRepository>;
+    };
     countryRepository.exists.mockResolvedValue(true);
     service = new PlayerService(repository, countryRepository);
   });
