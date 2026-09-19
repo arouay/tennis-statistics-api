@@ -9,6 +9,10 @@ function mockResponse(headersSent = false): jest.Mocked<Response> {
   return res;
 }
 
+function mockRequest(): Request {
+  return { log: { error: jest.fn() } } as unknown as Request;
+}
+
 describe('errorHandler', () => {
   let next: jest.Mock<NextFunction>;
 
@@ -27,16 +31,16 @@ describe('errorHandler', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('maps an unknown error to a generic 500', () => {
+  it('maps an unknown error to a generic 500 and logs it', () => {
     const res = mockResponse();
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const req = mockRequest();
+    const err = new Error('db down');
 
-    errorHandler(new Error('db down'), {} as Request, res, next);
+    errorHandler(err, req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({ message: 'Internal server error' });
-
-    consoleErrorSpy.mockRestore();
+    expect(req.log.error).toHaveBeenCalledWith({ err }, 'Unhandled error');
   });
 
   it('delegates to next when headers were already sent', () => {

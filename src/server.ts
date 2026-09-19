@@ -1,7 +1,8 @@
 import { app } from './app';
+import { logger } from './common/logger';
 
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
-  console.log(`tennis-statistics-api listening on port ${port}`);
+  logger.info(`tennis-statistics-api listening on port ${port}`);
 });
