@@ -8,6 +8,12 @@ describe('generateOpenApiDocument', () => {
     expect(Object.keys(document.paths ?? {})).toEqual(expect.arrayContaining(['/players', '/players/{id}', '/statistics']));
   });
 
+  it('declares the /api servers prefix used by the production reverse proxy', () => {
+    const document = generateOpenApiDocument();
+
+    expect(document.servers).toEqual([{ url: '/api' }]);
+  });
+
   it('documents GET /players/{id} with 200, 400 and 404 responses', () => {
     const document = generateOpenApiDocument();
 
