@@ -1,0 +1,80 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAME: tennis-statistics-api
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: npm test
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t "$IMAGE_NAME:${{ github.sha }}" .
+
+      - name: Save image as an archive
+        run: docker save "$IMAGE_NAME:${{ github.sha }}" | gzip > image.tar.gz
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "${{ vars.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Transfer image and compose file to the server
+        env:
+          HOST: ${{ vars.DEPLOY_HOST }}
+          USER: ${{ vars.DEPLOY_USER }}
+          DEST: ${{ vars.DEPLOY_PATH }}
+        run: |
+          SSH="ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=yes"
+          rsync -az -e "$SSH" image.tar.gz docker-compose.yml "$USER@$HOST:$DEST/"
+
+      - name: Load image and restart the stack
+        env:
+          HOST: ${{ vars.DEPLOY_HOST }}
+          USER: ${{ vars.DEPLOY_USER }}
+          DEST: ${{ vars.DEPLOY_PATH }}
+          TAG: ${{ github.sha }}
+        run: |
+          ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=yes "$USER@$HOST" \
+          DEST="$DEST" TAG="$TAG" IMAGE_NAME="$IMAGE_NAME" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          cd "$DEST"
+          gunzip -c image.tar.gz | docker load
+          EXPECTED_IMAGE=$(docker compose config --images | grep -- '-statistics-api$')
+          docker tag "$IMAGE_NAME:$TAG" "$EXPECTED_IMAGE"
+          docker compose up -d --no-build statistics-api
+          docker compose exec -T statistics-api npm run migrate:up
+          rm -f image.tar.gz
+          docker image prune -f
+          REMOTE
