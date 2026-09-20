@@ -5,7 +5,7 @@ if (process.env.NODE_ENV === 'production') {
   process.exit(1);
 }
 
-const users = [{ email: 'arouay.arouay@gmail.com', keycloakId: '436702ee-c8b7-4f18-b119-f0f97871d65c' }];
+const users = [{ email: 'arouay.arouay@gmail.com', keycloakId: '436702ee-c8b7-4j18-b199-f0f97871d65c' }];
 
 async function seed(): Promise<void> {
   for (const user of users) {
